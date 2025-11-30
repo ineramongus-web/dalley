@@ -40,6 +40,8 @@ export interface UserProfile {
   avatar_url: string | null;
   bio: string | null;
   website: string | null;
+  is_verified?: boolean; // New
+  is_banned?: boolean;   // New
 }
 
 export interface Template {

@@ -7,7 +7,12 @@ import { AuthModal } from './AuthModal';
 import { ProfileModal } from './ProfileModal';
 import { VerifiedBadge } from './VerifiedBadge';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  currentView: string;
+  onNavigate: (view: string) => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -36,30 +41,42 @@ export const Navbar: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (isMobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [isMobileOpen]);
-
   const handleSignOut = () => {
       signOut();
       setShowUserMenu(false);
+  };
+
+  const handleNavClick = (item: { label: string, href: string }) => {
+      if (item.label === 'Templates') {
+          onNavigate('templates');
+      } else {
+          onNavigate('home');
+          // Small timeout to allow view switch before scrolling
+          setTimeout(() => {
+             const element = document.querySelector(item.href);
+             element?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+      }
+      setIsMobileOpen(false);
+  };
+
+  const handleLogoClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      onNavigate('home');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
-          isScrolled
+          isScrolled || currentView === 'templates'
             ? 'bg-void/80 backdrop-blur-xl border-white/5 py-4 shadow-2xl shadow-pink-900/10'
             : 'bg-transparent border-transparent py-6'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <a href="#" className="flex items-center gap-2 group relative z-[60]">
+          <a href="#" onClick={handleLogoClick} className="flex items-center gap-2 group relative z-[60]">
             <div className="relative transform transition-transform group-hover:rotate-12 duration-300">
               <Layers className="w-8 h-8 text-white group-hover:text-pink-400 transition-colors duration-300" strokeWidth={2} />
               <div className="absolute inset-0 bg-pink-500/40 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -72,14 +89,22 @@ export const Navbar: React.FC = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-10">
             {NAV_ITEMS.map((item) => (
-              <a
+              <button
                 key={item.label}
-                href={item.href}
-                className="text-sm font-medium text-zinc-400 hover:text-white transition-colors relative group"
+                onClick={() => handleNavClick(item)}
+                className={`text-sm font-medium transition-colors relative group ${
+                    (currentView === 'templates' && item.label === 'Templates') 
+                    ? 'text-pink-400' 
+                    : 'text-zinc-400 hover:text-white'
+                }`}
               >
                 {item.label}
-                <span className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-pink-500 to-white transition-all duration-300 group-hover:w-full"></span>
-              </a>
+                <span className={`absolute -bottom-1 left-0 h-px bg-gradient-to-r from-pink-500 to-white transition-all duration-300 ${
+                    (currentView === 'templates' && item.label === 'Templates') 
+                    ? 'w-full' 
+                    : 'w-0 group-hover:w-full'
+                }`}></span>
+              </button>
             ))}
             
             {user ? (
@@ -98,7 +123,7 @@ export const Navbar: React.FC = () => {
                     <span className="text-sm font-medium text-white max-w-[100px] truncate">
                       {profile?.username || 'User'}
                     </span>
-                    <VerifiedBadge userId={user.id} size={14} />
+                    <VerifiedBadge userId={user.id} isVerified={profile?.is_verified} size={14} />
                  </button>
 
                  {/* Floating Dropdown Menu */}
@@ -116,7 +141,7 @@ export const Navbar: React.FC = () => {
                                 <div className="flex-1 overflow-hidden">
                                     <div className="flex items-center gap-2">
                                         <div className="text-white font-bold truncate">{profile?.username || 'User'}</div>
-                                        <VerifiedBadge userId={user.id} size={14} />
+                                        <VerifiedBadge userId={user.id} isVerified={profile?.is_verified} size={14} />
                                     </div>
                                     <div className="text-xs text-zinc-500 truncate">{user.email}</div>
                                 </div>
@@ -133,12 +158,6 @@ export const Navbar: React.FC = () => {
                             >
                                 <Edit className="w-4 h-4 text-zinc-500 group-hover:text-pink-400 transition-colors" />
                                 Edit Profile
-                            </button>
-                            <button 
-                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors group"
-                            >
-                                <Settings className="w-4 h-4 text-zinc-500 group-hover:text-pink-400 transition-colors" />
-                                Account Settings
                             </button>
                             <div className="h-px bg-white/5 my-1 mx-2"></div>
                             <button 
@@ -185,19 +204,18 @@ export const Navbar: React.FC = () => {
 
           <div className="flex flex-col items-center gap-8 relative z-10 w-full px-6">
               {NAV_ITEMS.map((item, idx) => (
-                <a
+                <button
                   key={item.label}
-                  href={item.href}
+                  onClick={() => handleNavClick(item)}
                   className="text-3xl font-sans font-bold text-zinc-400 hover:text-white transition-all transform hover:scale-105"
                   style={{ 
                     transitionDelay: `${idx * 50}ms`,
                     opacity: isMobileOpen ? 1 : 0,
                     transform: isMobileOpen ? 'translateY(0)' : 'translateY(20px)'
                   }}
-                  onClick={() => setIsMobileOpen(false)}
                 >
                   {item.label}
-                </a>
+                </button>
               ))}
               
               <div 

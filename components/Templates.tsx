@@ -1,16 +1,19 @@
-
 import React, { useState, useEffect } from 'react';
-import { Search, Upload, Download, Filter, X, Loader2, FileText, Image as ImageIcon, Trash2, Edit2, Save, AlertTriangle } from 'lucide-react';
+import { Search, Upload, Download, Filter, X, Loader2, FileText, Image as ImageIcon, Trash2, Edit2, Save, AlertTriangle, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Reveal } from './Reveal';
-import { TEMPLATE_CATEGORIES } from '../constants';
+import { TEMPLATE_CATEGORIES, ADMIN_ID } from '../constants';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Template } from '../types';
 import { VerifiedBadge } from './VerifiedBadge';
 import { AuthorModal } from './AuthorModal';
 
-export const Templates: React.FC = () => {
+interface TemplatesProps {
+  onBackToHome: () => void;
+}
+
+export const Templates: React.FC<TemplatesProps> = ({ onBackToHome }) => {
   const { user } = useAuth();
   const { showToast } = useToast();
   
@@ -54,7 +57,7 @@ export const Templates: React.FC = () => {
         .from('templates')
         .select(`
           *,
-          profiles:user_id (id, username, avatar_url, bio)
+          profiles:user_id (id, username, avatar_url, bio, is_verified, is_banned)
         `)
         .order('created_at', { ascending: false });
 
@@ -74,15 +77,12 @@ export const Templates: React.FC = () => {
   };
 
   const handleTemplateUpdated = (updatedTemplate: Template) => {
-      // Update local list
       setTemplates(prev => prev.map(t => t.id === updatedTemplate.id ? { ...t, ...updatedTemplate } : t));
-      // Update selected template to reflect changes immediately in the modal
       setSelectedTemplate(prev => prev ? { ...prev, ...updatedTemplate } : null);
       showToast("Template updated successfully", 'success');
   };
 
   const handleDownloadIncrement = (id: string) => {
-      // Optimistic update
       setTemplates(prev => prev.map(t => t.id === id ? { ...t, downloads: t.downloads + 1 } : t));
       if (selectedTemplate?.id === id) {
           setSelectedTemplate(prev => prev ? { ...prev, downloads: prev.downloads + 1 } : null);
@@ -90,83 +90,94 @@ export const Templates: React.FC = () => {
   };
 
   return (
-    <section id="templates" className="py-32 bg-black relative">
-       {/* Ambient Light */}
-       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-pink-900/10 blur-[120px] rounded-full pointer-events-none"></div>
+    <div className="min-h-screen bg-black relative pt-24">
+       {/* New Header Design */}
+       <div className="w-full bg-[#080808] border-b border-white/5 pb-12 mb-12 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.1),transparent_50%)]"></div>
+          
+          <div className="max-w-7xl mx-auto px-6 relative z-10 pt-8">
+              <button 
+                onClick={onBackToHome}
+                className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-8 group"
+              >
+                  <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                  Back to Home
+              </button>
 
-       <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <Reveal width="100%">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-                <div>
-                    <h2 className="font-sans text-4xl md:text-5xl font-bold text-white mb-4">
-                        Community <span className="text-pink-500">Templates</span>
-                    </h2>
-                    <p className="text-zinc-400 max-w-lg">
-                        Explore, download, and share high-quality UI kits. Import `.dy` files directly into Dalley Editor.
-                    </p>
-                </div>
-                <button
-                    onClick={() => {
-                        if (!user) {
-                            showToast("You must be signed in to upload", 'error');
-                            return;
-                        }
-                        setShowUploadModal(true);
-                    }}
-                    className="px-6 py-3 bg-white text-black font-bold rounded-xl flex items-center gap-2 hover:bg-pink-500 hover:text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/10"
-                >
-                    <Upload className="w-5 h-5" />
-                    Upload Template
-                </button>
-            </div>
-          </Reveal>
-
-          {/* Search & Filter Bar */}
-          <Reveal width="100%" delay={0.1} variant="slide-up">
-              <div className="bg-zinc-900/50 border border-white/10 p-4 rounded-2xl flex flex-col md:flex-row gap-4 mb-12 backdrop-blur-sm">
-                  <div className="relative flex-1">
-                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
-                      <input 
-                        type="text" 
-                        placeholder="Search templates or authors..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-black/50 border border-white/5 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all placeholder:text-zinc-600"
-                      />
+              <div className="flex flex-col lg:flex-row justify-between items-end gap-8">
+                  <div>
+                      <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+                          Community <span className="text-pink-500">Marketplace</span>
+                      </h1>
+                      <p className="text-zinc-400 max-w-xl text-lg">
+                          Discover premium UI kits, HUDs, and systems created by the Dalley community. Ready to import.
+                      </p>
                   </div>
-                  <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-2 md:pb-0">
-                      {TEMPLATE_CATEGORIES.map(cat => (
-                          <button
-                            key={cat}
-                            onClick={() => setSelectedCategory(cat)}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat ? 'bg-pink-600 border-pink-500 text-white' : 'bg-black/50 border-white/5 text-zinc-400 hover:text-white hover:bg-white/5'}`}
-                          >
-                              {cat}
-                          </button>
-                      ))}
+
+                  <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
+                     {/* Floating Search Bar */}
+                     <div className="relative group min-w-[300px]">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-pink-500 transition-colors" />
+                        <input 
+                            type="text" 
+                            placeholder="Search templates..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-zinc-900 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all shadow-lg"
+                        />
+                     </div>
+                     <button
+                        onClick={() => {
+                            if (!user) {
+                                showToast("You must be signed in to upload", 'error');
+                                return;
+                            }
+                            setShowUploadModal(true);
+                        }}
+                        className="px-6 py-3 bg-white text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-pink-500 hover:text-white transition-all shadow-lg shadow-white/10 shrink-0"
+                    >
+                        <Upload className="w-5 h-5" />
+                        Upload
+                    </button>
                   </div>
               </div>
-          </Reveal>
 
-          {/* Grid - Adjusted for better mobile width */}
+              {/* Categories Tabs */}
+              <div className="flex gap-2 mt-12 overflow-x-auto custom-scrollbar pb-2">
+                  {TEMPLATE_CATEGORIES.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat ? 'bg-pink-600 border-pink-500 text-white shadow-lg shadow-pink-900/20' : 'bg-zinc-900 border-white/5 text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
+                      >
+                          {cat}
+                      </button>
+                  ))}
+              </div>
+          </div>
+       </div>
+
+       <div className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
           {loading ? (
-             <div className="flex justify-center py-20">
-                 <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+             <div className="flex flex-col items-center justify-center py-24 gap-4">
+                 <Loader2 className="w-10 h-10 animate-spin text-pink-500" />
+                 <p className="text-zinc-500 animate-pulse">Loading assets...</p>
              </div>
           ) : filteredTemplates.length === 0 ? (
-             <div className="text-center py-20 text-zinc-500 border border-dashed border-white/10 rounded-2xl bg-zinc-900/20">
-                 <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                 <p>No templates found.</p>
+             <div className="text-center py-32 text-zinc-500 border border-dashed border-white/10 rounded-3xl bg-zinc-900/20">
+                 <FileText className="w-16 h-16 mx-auto mb-6 opacity-30" />
+                 <h3 className="text-xl font-bold text-white mb-2">No results found</h3>
+                 <p>Try adjusting your search or category filters.</p>
              </div>
           ) : (
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                  {filteredTemplates.map((template, idx) => (
                     <Reveal key={template.id} delay={idx * 0.05} variant="slide-up" width="100%">
                         <div 
                            onClick={() => setSelectedTemplate(template)}
-                           className="group bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden hover:border-pink-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-900/10 cursor-pointer h-full flex flex-col min-h-[350px]"
+                           className="group bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden hover:border-pink-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-pink-900/10 cursor-pointer h-full flex flex-col hover:-translate-y-1"
                         >
-                            <div className="h-56 bg-zinc-950 relative overflow-hidden shrink-0">
+                            <div className="aspect-[4/3] bg-zinc-950 relative overflow-hidden shrink-0">
                                 {template.image_url ? (
                                     <img src={template.image_url} alt={template.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                 ) : (
@@ -174,28 +185,28 @@ export const Templates: React.FC = () => {
                                         <ImageIcon className="w-10 h-10 text-zinc-600" />
                                     </div>
                                 )}
-                                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-white border border-white/10">
+                                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-md text-[10px] font-bold text-white border border-white/10 uppercase tracking-wider">
                                     {template.category}
                                 </div>
                             </div>
-                            <div className="p-6 flex-1 flex flex-col">
-                                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-pink-400 transition-colors line-clamp-1">{template.title}</h3>
+                            <div className="p-4 flex-1 flex flex-col">
+                                <h3 className="text-lg font-bold text-white mb-1 group-hover:text-pink-400 transition-colors line-clamp-1">{template.title}</h3>
                                 <div 
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         if (template.profiles?.id) setShowAuthorModal(template.profiles.id);
                                     }}
-                                    className="flex items-center gap-3 mb-6 hover:bg-white/5 p-2 -ml-2 rounded-xl transition-colors w-fit"
+                                    className="flex items-center gap-2 mb-4 hover:bg-white/5 p-1 -ml-1 rounded-lg transition-colors w-fit"
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-zinc-800 overflow-hidden border border-white/10">
+                                    <div className="w-5 h-5 rounded-full bg-zinc-800 overflow-hidden border border-white/10">
                                         {template.profiles?.avatar_url && <img src={template.profiles.avatar_url} className="w-full h-full object-cover" />}
                                     </div>
-                                    <span className="text-sm text-zinc-400 hover:text-white transition-colors font-medium">{template.profiles?.username || 'Unknown'}</span>
-                                    {template.profiles?.id && <VerifiedBadge userId={template.profiles.id} size={14} />}
+                                    <span className="text-xs text-zinc-400 hover:text-white transition-colors font-medium">{template.profiles?.username || 'Unknown'}</span>
+                                    {template.profiles?.id && <VerifiedBadge userId={template.profiles.id} isVerified={template.profiles.is_verified} size={12} />}
                                 </div>
-                                <div className="mt-auto flex justify-between items-center text-xs text-zinc-500 border-t border-white/5 pt-4 font-mono">
+                                <div className="mt-auto flex justify-between items-center text-[10px] text-zinc-500 font-mono">
                                     <span>{new Date(template.created_at).toLocaleDateString()}</span>
-                                    <span className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded"><Download className="w-3 h-3" /> {template.downloads}</span>
+                                    <span className="flex items-center gap-1 bg-zinc-800/50 px-1.5 py-0.5 rounded"><Download className="w-3 h-3" /> {template.downloads}</span>
                                 </div>
                             </div>
                         </div>
@@ -205,7 +216,7 @@ export const Templates: React.FC = () => {
           )}
        </div>
 
-       {/* Modals */}
+       {/* Modals - Reused from previous implementation */}
        <UploadModal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} onUploadSuccess={fetchTemplates} />
        {selectedTemplate && (
            <TemplateDetailModal 
@@ -223,11 +234,12 @@ export const Templates: React.FC = () => {
        {showAuthorModal && (
            <AuthorModal userId={showAuthorModal} onClose={() => setShowAuthorModal(null)} />
        )}
-    </section>
+    </div>
   );
 };
 
 const UploadModal: React.FC<{ isOpen: boolean, onClose: () => void, onUploadSuccess: () => void }> = ({ isOpen, onClose, onUploadSuccess }) => {
+    // ... [Previous UploadModal Logic] ...
     const { user } = useAuth();
     const { showToast } = useToast();
     const [title, setTitle] = useState('');
@@ -350,15 +362,16 @@ const UploadModal: React.FC<{ isOpen: boolean, onClose: () => void, onUploadSucc
 };
 
 interface TemplateDetailProps {
-    template: Template;
-    onClose: () => void;
-    onAuthorClick: (id: string) => void;
-    onDelete?: (id: string) => void;
-    onUpdate?: (updated: Template) => void;
-    onDownloadIncrement?: () => void;
+  template: Template;
+  onClose: () => void;
+  onAuthorClick: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onUpdate?: (template: Template) => void;
+  onDownloadIncrement?: () => void;
 }
 
 const TemplateDetailModal: React.FC<TemplateDetailProps> = ({ template, onClose, onAuthorClick, onDelete, onUpdate, onDownloadIncrement }) => {
+    // ... [Previous DetailModal Logic] ...
     const { user } = useAuth();
     const { showToast } = useToast();
     const [isEditing, setIsEditing] = useState(false);
@@ -368,27 +381,24 @@ const TemplateDetailModal: React.FC<TemplateDetailProps> = ({ template, onClose,
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [downloadCount, setDownloadCount] = useState(template.downloads);
 
-    // Sync download count if prop changes
     useEffect(() => {
         setDownloadCount(template.downloads);
     }, [template.downloads]);
 
-    // Sync edit fields if prop changes (fixes "reverting" visual bug if reopening)
     useEffect(() => {
         setEditTitle(template.title);
         setEditDesc(template.description);
     }, [template.title, template.description]);
 
     const isOwner = user?.id === template.user_id;
+    const isAdmin = user?.id === ADMIN_ID;
+    const canEdit = isOwner; 
+    const canDelete = isOwner || isAdmin; 
 
     const handleDownload = async () => {
         window.open(template.file_url, '_blank');
-        
-        // Immediate local update
         setDownloadCount(prev => prev + 1);
         if (onDownloadIncrement) onDownloadIncrement();
-        
-        // RPC update
         const { error } = await supabase.rpc('increment_downloads', { row_id: template.id });
         if (error) console.error("Error incrementing downloads:", error);
     };
@@ -416,7 +426,6 @@ const TemplateDetailModal: React.FC<TemplateDetailProps> = ({ template, onClose,
             
             setIsEditing(false);
             if (onUpdate) {
-                // Pass full updated object back to parent
                 onUpdate({ ...template, ...updates });
             }
         } catch (err: any) {
@@ -441,7 +450,6 @@ const TemplateDetailModal: React.FC<TemplateDetailProps> = ({ template, onClose,
                  </div>
 
                  <div className="w-full md:w-1/2 p-8 overflow-y-auto flex flex-col custom-scrollbar relative">
-                     {/* Delete Confirmation Overlay */}
                      {showDeleteConfirm && (
                          <div className="absolute inset-0 bg-black/95 z-30 flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
                              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mb-4 text-red-500">
@@ -459,16 +467,23 @@ const TemplateDetailModal: React.FC<TemplateDetailProps> = ({ template, onClose,
                      <div className="mb-6">
                          <div className="flex justify-between items-start">
                              <div className="text-pink-500 text-xs font-bold uppercase tracking-widest mb-2">{template.category}</div>
-                             {isOwner && !isEditing && (
-                                 <div className="flex gap-2">
+                             <div className="flex gap-2">
+                                 {isAdmin && !isOwner && (
+                                     <div className="px-2 py-1 bg-red-500/10 text-red-500 text-[10px] font-bold rounded uppercase border border-red-500/20 self-center mr-2">Admin Mode</div>
+                                 )}
+                                 
+                                 {canEdit && !isEditing && (
                                      <button onClick={() => setIsEditing(true)} className="p-2 hover:bg-white/5 rounded-lg text-zinc-400 hover:text-white transition-colors" title="Edit">
                                          <Edit2 className="w-4 h-4" />
                                      </button>
+                                 )}
+                                 
+                                 {canDelete && !isEditing && (
                                      <button onClick={() => setShowDeleteConfirm(true)} className="p-2 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-500 transition-colors" title="Delete">
                                          <Trash2 className="w-4 h-4" />
                                      </button>
-                                 </div>
-                             )}
+                                 )}
+                             </div>
                          </div>
 
                          {isEditing ? (
@@ -491,7 +506,7 @@ const TemplateDetailModal: React.FC<TemplateDetailProps> = ({ template, onClose,
                              <div>
                                  <div className="flex items-center gap-1">
                                      <span className="text-white font-bold text-sm">{template.profiles?.username || 'Unknown'}</span>
-                                     {template.profiles?.id && <VerifiedBadge userId={template.profiles.id} size={14} />}
+                                     <VerifiedBadge userId={template.profiles?.id} isVerified={template.profiles?.is_verified} size={14} />
                                  </div>
                                  <div className="text-xs text-zinc-500">View Profile</div>
                              </div>

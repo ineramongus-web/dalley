@@ -1,8 +1,12 @@
+
 import React, { useEffect, useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, ShieldAlert, CheckCircle2, Ban } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { UserProfile } from '../types';
 import { VerifiedBadge } from './VerifiedBadge';
+import { useAuth } from '../context/AuthContext';
+import { ADMIN_ID } from '../constants';
+import { useToast } from '../context/ToastContext';
 
 interface AuthorModalProps {
   userId: string;
@@ -10,48 +14,93 @@ interface AuthorModalProps {
 }
 
 export const AuthorModal: React.FC<AuthorModalProps> = ({ userId, onClose }) => {
+  const { user } = useAuth();
+  const { showToast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ templates: 0, downloads: 0 });
+  
+  // Admin State
+  const isAdmin = user?.id === ADMIN_ID;
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        // Fetch Profile
-        const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
-        if (profileData) setProfile(profileData);
-
-        // Fetch Stats
-        // 1. Template Count
-        const { count: templateCount, error: countError } = await supabase
-          .from('templates')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', userId);
-        
-        // 2. Total Downloads
-        const { data: downloadsData, error: downloadError } = await supabase
-            .from('templates')
-            .select('downloads')
-            .eq('user_id', userId);
-
-        const totalDownloads = downloadsData 
-            ? downloadsData.reduce((acc, curr) => acc + (curr.downloads || 0), 0)
-            : 0;
-
-        setStats({
-            templates: templateCount || 0,
-            downloads: totalDownloads
-        });
-
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, [userId]);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      // Fetch Profile
+      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      if (profileData) setProfile(profileData);
+
+      // Fetch Stats
+      const { count: templateCount } = await supabase
+        .from('templates')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+      
+      const { data: downloadsData } = await supabase
+          .from('templates')
+          .select('downloads')
+          .eq('user_id', userId);
+
+      const totalDownloads = downloadsData 
+          ? downloadsData.reduce((acc, curr) => acc + (curr.downloads || 0), 0)
+          : 0;
+
+      setStats({
+          templates: templateCount || 0,
+          downloads: totalDownloads
+      });
+
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleVerify = async () => {
+      if (!profile) return;
+      setActionLoading(true);
+      try {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ is_verified: !profile.is_verified })
+            .eq('id', userId);
+          
+          if (error) throw error;
+          setProfile(prev => prev ? ({ ...prev, is_verified: !prev.is_verified }) : null);
+          showToast(profile.is_verified ? "Verification removed" : "User verified", 'success');
+      } catch (err: any) {
+          showToast(err.message, 'error');
+      } finally {
+          setActionLoading(false);
+      }
+  };
+
+  const toggleBan = async () => {
+      if (!profile) return;
+      if (!confirm(profile.is_banned ? "Unban this user?" : "PERMANENTLY BAN this user?")) return;
+      
+      setActionLoading(true);
+      try {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ is_banned: !profile.is_banned })
+            .eq('id', userId);
+          
+          if (error) throw error;
+          setProfile(prev => prev ? ({ ...prev, is_banned: !prev.is_banned }) : null);
+          showToast(profile.is_banned ? "User unbanned" : "User BANNED", 'error');
+      } catch (err: any) {
+          showToast(err.message, 'error');
+      } finally {
+          setActionLoading(false);
+      }
+  };
 
   if (!userId) return null;
 
@@ -83,9 +132,16 @@ export const AuthorModal: React.FC<AuthorModalProps> = ({ userId, onClose }) => 
                   <div className="text-center">
                       <div className="flex items-center justify-center gap-2 mb-1">
                           <h3 className="text-2xl font-bold text-white">{profile?.username}</h3>
-                          <VerifiedBadge userId={profile?.id} />
+                          <VerifiedBadge userId={profile?.id} isVerified={profile?.is_verified} />
                       </div>
-                      <p className="text-zinc-500 text-sm mb-6">{profile?.bio || 'No bio yet.'}</p>
+                      
+                      {profile?.is_banned && (
+                          <div className="inline-block px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-red-500 text-xs font-bold uppercase tracking-widest mt-2">
+                              BANNED
+                          </div>
+                      )}
+
+                      <p className="text-zinc-500 text-sm mb-6 mt-2">{profile?.bio || 'No bio yet.'}</p>
                       
                       <div className="grid grid-cols-2 gap-3 text-center border-t border-white/5 pt-4">
                           <div>
@@ -97,6 +153,31 @@ export const AuthorModal: React.FC<AuthorModalProps> = ({ userId, onClose }) => 
                               <div className="text-zinc-600 text-[10px] uppercase tracking-wider">Downloads</div>
                           </div>
                       </div>
+
+                      {/* ADMIN TOOLS */}
+                      {isAdmin && userId !== ADMIN_ID && (
+                          <div className="mt-6 pt-4 border-t border-white/5 space-y-2">
+                              <div className="text-xs text-zinc-600 uppercase tracking-widest font-bold mb-2">Admin Tools</div>
+                              <div className="grid grid-cols-2 gap-2">
+                                  <button 
+                                      onClick={toggleVerify}
+                                      disabled={actionLoading}
+                                      className="py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg text-xs font-bold flex items-center justify-center gap-2"
+                                  >
+                                      <CheckCircle2 className="w-3 h-3" />
+                                      {profile?.is_verified ? 'Unverify' : 'Verify'}
+                                  </button>
+                                  <button 
+                                      onClick={toggleBan}
+                                      disabled={actionLoading}
+                                      className="py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-lg text-xs font-bold flex items-center justify-center gap-2"
+                                  >
+                                      <ShieldAlert className="w-3 h-3" />
+                                      {profile?.is_banned ? 'Unban' : 'Ban User'}
+                                  </button>
+                              </div>
+                          </div>
+                      )}
                   </div>
               )}
           </div>

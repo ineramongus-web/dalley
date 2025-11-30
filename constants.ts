@@ -1,9 +1,11 @@
 
 import { Feature, ShowcaseItem, NavItem } from './types';
 
+export const ADMIN_ID = "ad30f43b-514f-4b10-a2c1-3c84aeb57020";
+
 export const NAV_ITEMS: NavItem[] = [
   { label: 'Features', href: '#features' },
-  { label: 'Templates', href: '#templates' }, // Added
+  { label: 'Templates', href: '#templates' }, 
   { label: 'SPR Motion', href: '#code-export' },
   { label: 'Showcase', href: '#showcase' },
   { label: 'Roadmap', href: '#process' },

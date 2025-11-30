@@ -1,16 +1,20 @@
+
 import React from 'react';
 import { BadgeCheck, ShieldCheck } from 'lucide-react';
+import { ADMIN_ID } from '../constants';
 
 interface VerifiedBadgeProps {
   userId?: string;
+  isVerified?: boolean; // Now accepts dynamic prop
   className?: string;
   size?: number;
 }
 
-const VERIFIED_UUID = "ad30f43b-514f-4b10-a2c1-3c84aeb57020";
+export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({ userId, isVerified, className = "", size = 20 }) => {
+  // Check if it's the specific Admin ID OR if the user has the is_verified flag from DB
+  const isAuthorized = userId === ADMIN_ID || isVerified;
 
-export const VerifiedBadge: React.FC<VerifiedBadgeProps> = ({ userId, className = "", size = 20 }) => {
-  if (userId !== VERIFIED_UUID) return null;
+  if (!isAuthorized) return null;
 
   // Use a slightly larger size than requested to make it pop
   const displaySize = size + 4;
