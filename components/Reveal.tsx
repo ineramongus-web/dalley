@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+
+import React from 'react';
+import { motion, Variants } from 'framer-motion';
 
 type RevealVariant = 'fade' | 'slide-up' | 'slide-right' | 'zoom' | 'blur';
 
@@ -8,6 +10,7 @@ interface RevealProps {
   delay?: number;
   variant?: RevealVariant;
   className?: string;
+  duration?: number;
 }
 
 export const Reveal: React.FC<RevealProps> = ({ 
@@ -15,84 +18,52 @@ export const Reveal: React.FC<RevealProps> = ({
   width = 'fit-content', 
   delay = 0,
   variant = 'slide-up',
-  className = ''
+  className = '',
+  duration = 0.5
 }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) {
-      setIsVisible(true);
-      return;
-    }
-
-    // Check visibility on mount after a tick to allow layout paint
-    const initialCheckTimer = setTimeout(() => {
-        if (ref.current) {
-            const rect = ref.current.getBoundingClientRect();
-            // If element is already in view (like Hero), show immediately
-            if (rect.top < window.innerHeight) { 
-                setIsVisible(true);
-            }
-        }
-    }, 100);
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { 
-        threshold: 0.1, 
-        rootMargin: '0px 0px -50px 0px' // Trigger when 50px into viewport
-      }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(initialCheckTimer);
-    };
-  }, []);
-
-  const getTransform = () => {
-    if (!isVisible) {
-      switch (variant) {
-        case 'slide-up': return 'translateY(50px)';
-        case 'slide-right': return 'translateX(-50px)';
-        case 'zoom': return 'scale(0.95)';
-        default: return 'translateY(0)';
-      }
-    }
-    return 'translate(0) scale(1)';
-  };
-
-  const getOpacity = () => isVisible ? 1 : 0;
   
-  const getFilter = () => {
-    if (variant === 'blur' && !isVisible) return 'blur(10px)';
-    return 'blur(0)';
+  const getVariants = (): Variants => {
+    switch (variant) {
+        case 'slide-up':
+            return {
+                hidden: { opacity: 0, y: 75, filter: 'blur(10px)' },
+                visible: { opacity: 1, y: 0, filter: 'blur(0px)' }
+            };
+        case 'slide-right':
+            return {
+                hidden: { opacity: 0, x: -75, filter: 'blur(10px)' },
+                visible: { opacity: 1, x: 0, filter: 'blur(0px)' }
+            };
+        case 'zoom':
+            return {
+                hidden: { opacity: 0, scale: 0.8, filter: 'blur(10px)' },
+                visible: { opacity: 1, scale: 1, filter: 'blur(0px)' }
+            };
+        case 'blur':
+            return {
+                hidden: { opacity: 0, filter: 'blur(20px)' },
+                visible: { opacity: 1, filter: 'blur(0px)' }
+            };
+        case 'fade':
+        default:
+            return {
+                hidden: { opacity: 0 },
+                visible: { opacity: 1 }
+            };
+    }
   };
 
   return (
-    <div ref={ref} style={{ width, minHeight: '1px' }} className={`relative ${className}`}>
-      <div
-        style={{
-          transform: getTransform(),
-          opacity: getOpacity(),
-          filter: getFilter(),
-          transition: `all 1.0s cubic-bezier(0.17, 0.55, 0.55, 1) ${isVisible ? delay : 0}s`,
-          willChange: 'transform, opacity'
-        }}
+    <div style={{ width, position: 'relative' }} className={className}>
+      <motion.div
+        variants={getVariants()}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: false, margin: "-10% 0px -10% 0px" }} // Triggers reverse on scroll out
+        transition={{ duration: duration, delay: delay, ease: [0.25, 0.25, 0, 1] }}
       >
         {children}
-      </div>
+      </motion.div>
     </div>
   );
 };

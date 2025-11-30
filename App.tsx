@@ -13,6 +13,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { NotFound } from './components/NotFound';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -25,10 +26,6 @@ function App() {
     }, 2500); // Matches the loading screen animation timing
     return () => clearTimeout(timer);
   }, []);
-
-  if (loading) {
-      return <LoadingScreen />;
-  }
 
   // View Router
   const renderView = () => {
@@ -64,15 +61,23 @@ function App() {
     <AuthProvider>
       <ToastProvider>
         <div className="min-h-screen bg-black text-white selection:bg-pink-500 selection:text-white">
-          <Navbar 
-            currentView={currentView} 
-            onNavigate={(view) => {
-                setCurrentView(view);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }} 
-          />
-          {renderView()}
-          <Footer />
+          <AnimatePresence>
+            {loading && <LoadingScreen key="loader" />}
+          </AnimatePresence>
+
+          {!loading && (
+             <>
+                <Navbar 
+                    currentView={currentView} 
+                    onNavigate={(view) => {
+                        setCurrentView(view);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }} 
+                />
+                {renderView()}
+                <Footer />
+             </>
+          )}
         </div>
       </ToastProvider>
     </AuthProvider>

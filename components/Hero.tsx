@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Play, Code2, Layers, MousePointer2, ExternalLink, Move } from 'lucide-react';
 import { Reveal } from './Reveal';
+import { TextReveal } from './TextReveal';
 
 export const Hero: React.FC = () => {
   const [hovered, setHovered] = useState(false);
@@ -22,20 +23,23 @@ export const Hero: React.FC = () => {
             </div>
           </Reveal>
           
-          <Reveal delay={0.1} variant="slide-up">
+          <div>
             <h1 className="font-sans text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tighter text-white">
-              Roblox Design <br />
-              <span className="gradient-accent">Made Easy.</span>
+              <TextReveal delay={0.1}>Roblox Design</TextReveal>
+              <div className="mt-2"></div>
+              <Reveal delay={0.4} variant="slide-up" width="100%">
+                 <span className="gradient-accent block pb-4">Made Easy.</span>
+              </Reveal>
             </h1>
-          </Reveal>
+          </div>
 
-          <Reveal delay={0.2} variant="fade">
+          <Reveal delay={0.5} variant="slide-up">
             <p className="text-zinc-400 text-lg md:text-xl max-w-lg leading-relaxed border-l-2 border-pink-500/30 pl-6">
               Dalley is the first web-based UI editor for Roblox. Create SPR-powered interfaces, export to Lua, and sync to Studio instantly. No downloads required.
             </p>
           </Reveal>
 
-          <Reveal delay={0.3} variant="slide-up">
+          <Reveal delay={0.6} variant="slide-up">
             <div className="flex flex-wrap gap-4">
               <button
                 onClick={() => window.open('https://example.com', '_blank')}

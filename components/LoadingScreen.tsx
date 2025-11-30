@@ -1,76 +1,72 @@
 
 import React, { useEffect, useState } from 'react';
-import { Layers, Terminal, CheckCircle2 } from 'lucide-react';
+import { Layers } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const LoadingScreen: React.FC = () => {
   const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState('Initializing Dalley Kernel...');
 
   useEffect(() => {
-    const steps = [
-      { pct: 20, msg: 'Loading Assets...' },
-      { pct: 45, msg: 'Connecting to Supabase...' },
-      { pct: 70, msg: 'Hydrating UI Components...' },
-      { pct: 90, msg: 'Starting Vision Engine...' },
-      { pct: 100, msg: 'Ready.' }
-    ];
+    const timer = setInterval(() => {
+        setProgress(prev => {
+            if (prev >= 100) {
+                clearInterval(timer);
+                return 100;
+            }
+            return prev + Math.random() * 10;
+        });
+    }, 200);
 
-    let currentStep = 0;
-
-    const interval = setInterval(() => {
-      if (currentStep >= steps.length) {
-        clearInterval(interval);
-        return;
-      }
-
-      const step = steps[currentStep];
-      setProgress(step.pct);
-      setStatus(step.msg);
-      currentStep++;
-    }, 400);
-
-    return () => clearInterval(interval);
+    return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center overflow-hidden font-mono">
-      {/* Background Grid */}
-      <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(236,72,153,0.05),transparent_70%)]"></div>
+    <motion.div 
+        className="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center"
+        exit={{ opacity: 0, transition: { duration: 0.8 } }}
+    >
+      <div className="relative flex flex-col items-center">
+        {/* Pulsing Glow */}
+        <motion.div 
+            animate={{ 
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.6, 0.3]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-0 bg-pink-500/20 blur-[80px] rounded-full w-64 h-64 -z-10"
+        />
 
-      <div className="relative z-10 flex flex-col items-center w-full max-w-sm px-6">
-        {/* Logo Pulse */}
-        <div className="relative mb-12">
-           <div className="absolute inset-0 bg-pink-500 blur-2xl opacity-20 animate-pulse"></div>
-           <Layers className="w-16 h-16 text-white animate-float" />
-        </div>
+        {/* Logo */}
+        <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="mb-8"
+        >
+             <Layers className="w-16 h-16 text-white" />
+        </motion.div>
 
-        {/* Progress Bar */}
-        <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden mb-4 relative">
-            <div 
-                className="h-full bg-gradient-to-r from-pink-600 to-purple-600 transition-all duration-500 ease-out relative"
-                style={{ width: `${progress}%` }}
-            >
-                <div className="absolute right-0 top-0 bottom-0 w-10 bg-white/50 blur-[5px]"></div>
-            </div>
-        </div>
+        {/* Text */}
+        <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-center"
+        >
+            <h1 className="font-sans font-bold text-3xl text-white mb-2 tracking-tight">dalley.</h1>
+            <p className="text-zinc-500 text-sm font-medium">Design without limits</p>
+        </motion.div>
 
-        {/* Status Text */}
-        <div className="w-full flex justify-between items-center text-xs text-zinc-500 h-6">
-            <span className="flex items-center gap-2">
-                <Terminal className="w-3 h-3" />
-                {status}
-            </span>
-            <span className="text-pink-500 font-bold">{progress}%</span>
-        </div>
-
-        {/* Decorative Code Lines */}
-        <div className="mt-12 space-y-1 text-[10px] text-zinc-800 w-full text-center select-none opacity-50">
-            <div>0x45F2A9 &gt;&gt; MEM_ALLOC_OK</div>
-            <div>DALLEY_CORE_V2.1.0 &gt;&gt; LOADED</div>
-            <div>RENDER_THREAD &gt;&gt; ACTIVE</div>
+        {/* Minimal Progress Bar */}
+        <div className="mt-8 w-32 h-1 bg-zinc-900 rounded-full overflow-hidden">
+            <motion.div 
+                className="h-full bg-pink-500"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ type: "tween", ease: "linear" }}
+            />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -2,6 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { MousePointer2, Code2, Smartphone, Zap, Cloud, Layout } from 'lucide-react';
 import { Reveal } from './Reveal';
+import { TextReveal } from './TextReveal';
 
 const featuresList = [
   {
@@ -70,12 +71,14 @@ export const Features: React.FC = () => {
     <section id="features" className="py-32 relative bg-surface">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-          <Reveal width="100%">
-            <h2 className="font-sans text-5xl md:text-6xl font-bold mb-6 text-white">
-              Why <span className="text-pink-500">Dalley?</span>
+          <div className="w-full">
+            <h2 className="font-sans text-5xl md:text-6xl font-bold mb-6 text-white flex gap-3 flex-wrap">
+              <TextReveal>Why</TextReveal> <span className="text-pink-500"><TextReveal delay={0.2}>Dalley?</TextReveal></span>
             </h2>
-            <div className="h-1 w-24 bg-gradient-to-r from-pink-500 to-white rounded-full"></div>
-          </Reveal>
+            <Reveal width="100%">
+               <div className="h-1 w-24 bg-gradient-to-r from-pink-500 to-white rounded-full"></div>
+            </Reveal>
+          </div>
           <Reveal delay={0.2} variant="slide-right" width="100%">
             <p className="text-zinc-400 max-w-sm text-right md:text-left text-lg">
               The first web-based Roblox UI tool. Stop fighting with UDim2. Start creating.
