@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PenTool, Film, Code, Rocket, ChevronRight } from 'lucide-react';
 import { Reveal } from './Reveal';
@@ -61,7 +60,7 @@ export const Process: React.FC = () => {
                 >
                   <div className={`w-24 h-24 border rounded-2xl flex items-center justify-center mb-6 shadow-xl transition-all duration-300 ${activeStep === index ? 'bg-zinc-900 border-pink-500 shadow-pink-500/20' : 'bg-surface border-white/10 hover:border-zinc-700'}`}>
                     <div className={`w-20 h-20 rounded-xl flex items-center justify-center transition-colors ${activeStep === index ? 'bg-pink-500 text-white' : 'bg-zinc-900 text-zinc-400'}`}>
-                       {React.cloneElement(step.icon as React.ReactElement, { className: 'w-8 h-8' })}
+                       {React.cloneElement(step.icon as React.ReactElement<any>, { className: 'w-8 h-8' })}
                     </div>
                   </div>
                   

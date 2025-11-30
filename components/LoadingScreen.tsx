@@ -66,9 +66,9 @@ export const LoadingScreen: React.FC = () => {
 
         {/* Decorative Code Lines */}
         <div className="mt-12 space-y-1 text-[10px] text-zinc-800 w-full text-center select-none opacity-50">
-            <div>0x45F2A9 >> MEM_ALLOC_OK</div>
-            <div>DALLEY_CORE_V2.1.0 >> LOADED</div>
-            <div>RENDER_THREAD >> ACTIVE</div>
+            <div>0x45F2A9 &gt;&gt; MEM_ALLOC_OK</div>
+            <div>DALLEY_CORE_V2.1.0 &gt;&gt; LOADED</div>
+            <div>RENDER_THREAD &gt;&gt; ACTIVE</div>
         </div>
       </div>
     </div>
