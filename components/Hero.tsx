@@ -3,17 +3,18 @@ import React, { useState } from 'react';
 import { Play, Code2, Layers, MousePointer2, ExternalLink, Move } from 'lucide-react';
 import { Reveal } from './Reveal';
 import { TextReveal } from './TextReveal';
+import { DotGrid } from './DotGrid';
 
 export const Hero: React.FC = () => {
   const [hovered, setHovered] = useState(false);
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center pt-20 overflow-hidden bg-void">
-      {/* Background Ambience */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-pink-600/10 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3 animate-pulse-slow" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] translate-y-1/3 -translate-x-1/3 animate-blob" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-
+      {/* Background Ambience & Dot Grid */}
+      <DotGrid />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-pink-600/10 rounded-full blur-[120px] -translate-y-1/3 translate-x-1/3 animate-pulse-slow pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-[120px] translate-y-1/3 -translate-x-1/3 animate-blob pointer-events-none" />
+      
       <div className="max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-16 items-center relative z-10 mb-20 mt-10">
         <div className="flex flex-col gap-8">
           <Reveal variant="fade">

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Reveal } from './Reveal';
 import { ExternalLink, CreditCard, User, Settings, ShoppingBag, X, Heart, Maximize2, Shield, Zap, Check, MousePointer2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { VerifiedBadge } from './VerifiedBadge'; // Imported for potential usage
+import { VerifiedBadge } from './VerifiedBadge';
 
 // --- Interactive Sub-Components ---
 
@@ -175,7 +175,7 @@ const UI_EXAMPLES = [
     id: 'hud',
     title: 'Glassmorphism HUD',
     category: 'Interface',
-    icon: <User className="w-5 h-5" />,
+    icon: User,
     color: 'from-blue-500 to-cyan-500',
     description: 'Minimalist player stats with health bar animation and glass effect.',
     component: InteractiveHUD
@@ -184,7 +184,7 @@ const UI_EXAMPLES = [
     id: 'shop',
     title: 'Item Shop',
     category: 'E-Commerce',
-    icon: <ShoppingBag className="w-5 h-5" />,
+    icon: ShoppingBag,
     color: 'from-pink-500 to-purple-500',
     description: 'Vertical scrolling list with hover effects and buy interactions.',
     component: InteractiveShop
@@ -193,7 +193,7 @@ const UI_EXAMPLES = [
     id: 'inventory',
     title: 'Inventory Grid',
     category: 'System',
-    icon: <CreditCard className="w-5 h-5" />,
+    icon: CreditCard,
     color: 'from-amber-500 to-orange-500',
     description: 'Grid layout with auto-layout constraints and rarity borders.',
     component: InteractiveInventory
@@ -202,7 +202,7 @@ const UI_EXAMPLES = [
     id: 'settings',
     title: 'Settings Menu',
     category: 'Utility',
-    icon: <Settings className="w-5 h-5" />,
+    icon: Settings,
     color: 'from-emerald-500 to-teal-500',
     description: 'Toggle switches with spring animations and slider inputs.',
     component: InteractiveSettings
@@ -269,6 +269,7 @@ export const Showcase: React.FC = () => {
         <div className="grid md:grid-cols-2 gap-8 w-full">
           {UI_EXAMPLES.map((ui, index) => {
              const Component = ui.component;
+             const Icon = ui.icon;
              return (
             <Reveal key={ui.id} delay={index * 0.1} variant="slide-up" width="100%">
               <div 

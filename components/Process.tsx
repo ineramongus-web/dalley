@@ -1,28 +1,30 @@
+
 import React, { useState } from 'react';
 import { PenTool, Film, Code, Rocket, ChevronRight } from 'lucide-react';
 import { Reveal } from './Reveal';
 
+// Store icon components directly, not as elements
 const STEPS = [
   {
-    icon: <PenTool />,
+    icon: PenTool,
     title: 'Design',
     desc: 'Drag & drop frames, buttons, and scrolling lists using our intuitive editor.',
     tip: 'Auto-layout constraints included.'
   },
   {
-    icon: <Film />,
+    icon: Film,
     title: 'Animate',
     desc: 'Use the timeline to create complex tweens without writing TweenInfo manually.',
     tip: 'Real-time curve visualization.'
   },
   {
-    icon: <Code />,
+    icon: Code,
     title: 'Export',
     desc: 'Get a .lua file or a Model file compatible directly with Roblox Studio.',
     tip: 'Optimized ModuleScripts.'
   },
   {
-    icon: <Rocket />,
+    icon: Rocket,
     title: 'Publish',
     desc: 'Implement into your game instantly. Zero lag, fully optimized.',
     tip: 'Zero-dependency runtime.'
@@ -52,7 +54,9 @@ export const Process: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
-            {STEPS.map((step, index) => (
+            {STEPS.map((step, index) => {
+              const Icon = step.icon;
+              return (
               <Reveal key={index} delay={index * 0.1} variant="slide-up" width="100%">
                 <div 
                   className={`flex flex-col items-center text-center cursor-pointer transition-transform duration-500 ${activeStep === index ? '-translate-y-4' : 'hover:-translate-y-2'}`}
@@ -60,7 +64,7 @@ export const Process: React.FC = () => {
                 >
                   <div className={`w-24 h-24 border rounded-2xl flex items-center justify-center mb-6 shadow-xl transition-all duration-300 ${activeStep === index ? 'bg-zinc-900 border-pink-500 shadow-pink-500/20' : 'bg-surface border-white/10 hover:border-zinc-700'}`}>
                     <div className={`w-20 h-20 rounded-xl flex items-center justify-center transition-colors ${activeStep === index ? 'bg-pink-500 text-white' : 'bg-zinc-900 text-zinc-400'}`}>
-                       {React.cloneElement(step.icon as React.ReactElement<any>, { className: 'w-8 h-8' })}
+                       <Icon className="w-8 h-8" />
                     </div>
                   </div>
                   
@@ -78,7 +82,7 @@ export const Process: React.FC = () => {
                   </div>
                 </div>
               </Reveal>
-            ))}
+            )})}
           </div>
         </div>
       </div>

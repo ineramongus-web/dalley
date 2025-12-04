@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { Features } from './components/Services';
 import { Showcase } from './components/Showcase';
@@ -13,69 +11,91 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { NotFound } from './components/NotFound';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ClickSpark } from './components/ClickSpark';
+import { Dock } from './components/Dock';
+import { AuthModal } from './components/AuthModal';
+import { ProfileModal } from './components/ProfileModal';
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState('home');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   useEffect(() => {
     // Simulate initial asset loading
     const timer = setTimeout(() => {
         setLoading(false);
-    }, 2500); // Matches the loading screen animation timing
-    return () => clearTimeout(timer);
+    }, 2500);
+
+    // Event Listeners for Dock interactions
+    const handleOpenAuth = () => setShowAuthModal(true);
+    const handleOpenProfile = () => setShowProfileModal(true);
+
+    window.addEventListener('open-auth-modal', handleOpenAuth);
+    window.addEventListener('open-profile-modal', handleOpenProfile);
+
+    return () => {
+        clearTimeout(timer);
+        window.removeEventListener('open-auth-modal', handleOpenAuth);
+        window.removeEventListener('open-profile-modal', handleOpenProfile);
+    };
   }, []);
+
+  const handleNavigate = (view: string) => {
+    // Allow navigating to same view to trigger scroll to top
+    setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // View Router
   const renderView = () => {
       switch (currentView) {
           case 'home':
               return (
-                  <main className="animate-in fade-in duration-500">
+                  <PageWrapper key="home">
                     <Hero />
                     <Features />
                     <Process />
                     <CodePreview />
                     <Showcase />
                     <Testimonials />
-                  </main>
+                  </PageWrapper>
               );
           case 'templates':
               return (
-                  <main className="animate-in slide-in-from-bottom-4 duration-500">
-                    <Templates onBackToHome={() => {
-                        setCurrentView('home');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }} />
-                  </main>
+                  <PageWrapper key="templates">
+                    <Templates onBackToHome={() => handleNavigate('home')} />
+                  </PageWrapper>
               );
           case '404':
-              return <NotFound onGoHome={() => setCurrentView('home')} />;
+              return <PageWrapper key="404"><NotFound onGoHome={() => handleNavigate('home')} /></PageWrapper>;
           default:
-              return <NotFound onGoHome={() => setCurrentView('home')} />;
+              return <PageWrapper key="default"><NotFound onGoHome={() => handleNavigate('home')} /></PageWrapper>;
       }
   };
 
   return (
     <AuthProvider>
       <ToastProvider>
-        <div className="min-h-screen bg-black text-white selection:bg-pink-500 selection:text-white">
-          <AnimatePresence>
-            {loading && <LoadingScreen key="loader" />}
+        <div className="min-h-screen bg-black text-white selection:bg-pink-500 selection:text-white overflow-x-hidden">
+          <ClickSpark />
+          
+          <AnimatePresence mode="wait">
+            {loading ? (
+                <LoadingScreen key="loader" />
+            ) : (
+                renderView()
+            )}
           </AnimatePresence>
 
           {!loading && (
              <>
-                <Navbar 
-                    currentView={currentView} 
-                    onNavigate={(view) => {
-                        setCurrentView(view);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }} 
-                />
-                {renderView()}
                 <Footer />
+                <Dock onNavigate={handleNavigate} />
+                <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+                <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
              </>
           )}
         </div>
@@ -83,5 +103,41 @@ function App() {
     </AuthProvider>
   );
 }
+
+// Reusable Page Wrapper for Transitions
+const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    return (
+        <>
+            {/* The Content */}
+            <motion.main
+                initial={{ opacity: 0, y: 100 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -50 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10"
+            >
+                {children}
+            </motion.main>
+
+            {/* The Curtain Wipe Effect */}
+            <motion.div
+                className="fixed inset-0 bg-[#000] z-[90] pointer-events-none"
+                initial={{ scaleY: 1, transformOrigin: 'bottom' }}
+                animate={{ scaleY: 0 }}
+                exit={{ scaleY: 1, transformOrigin: 'bottom' }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            />
+            
+            {/* Secondary Curtain for depth */}
+            <motion.div
+                className="fixed inset-0 bg-pink-900/20 z-[89] pointer-events-none"
+                initial={{ scaleY: 1, transformOrigin: 'bottom' }}
+                animate={{ scaleY: 0 }}
+                exit={{ scaleY: 1, transformOrigin: 'bottom' }}
+                transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            />
+        </>
+    );
+};
 
 export default App;

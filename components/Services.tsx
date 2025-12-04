@@ -8,31 +8,31 @@ const featuresList = [
   {
     title: 'Cloud Editor',
     description: 'Design anywhere. Your projects sync automatically to the cloud.',
-    icon: <Cloud className="w-6 h-6" />,
+    icon: Cloud,
     colSpan: 'md:col-span-2'
   },
   {
     title: 'Lua Export',
     description: 'Generates clean, readable ModuleScripts.',
-    icon: <Code2 className="w-6 h-6" />,
+    icon: Code2,
     colSpan: 'md:col-span-1'
   },
   {
     title: 'Responsive',
     description: 'Constraints scale for Mobile & Console.',
-    icon: <Smartphone className="w-6 h-6" />,
+    icon: Smartphone,
     colSpan: 'md:col-span-1'
   },
   {
     title: 'SPR Motion',
     description: 'Physics-based spring animations built-in.',
-    icon: <Zap className="w-6 h-6" />,
+    icon: Zap,
     colSpan: 'md:col-span-1'
   },
   {
     title: 'Component Kits',
     description: 'Drag & drop HUDs, Inventories, and Shop systems.',
-    icon: <Layout className="w-6 h-6" />,
+    icon: Layout,
     colSpan: 'md:col-span-2'
   },
 ];
@@ -87,7 +87,9 @@ export const Features: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {featuresList.map((feature, index) => (
+          {featuresList.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
             <Reveal key={index} delay={index * 0.1} variant="zoom" className={feature.colSpan} width="100%">
               <TiltCard className="group relative h-full bg-zinc-900/40 border border-white/5 p-8 rounded-3xl overflow-hidden hover:bg-zinc-900/80 transition-colors duration-500 hover:border-pink-500/30 hover:shadow-2xl">
                 
@@ -97,7 +99,7 @@ export const Features: React.FC = () => {
                 <div className="relative z-10 h-full flex flex-col justify-between pointer-events-none">
                   <div className="flex justify-between items-start mb-8">
                     <div className="p-3 bg-zinc-950 border border-white/10 rounded-xl text-pink-400 group-hover:scale-110 group-hover:bg-pink-500 group-hover:text-white transition-all duration-300 shadow-lg">
-                      {feature.icon}
+                      <Icon className="w-6 h-6" />
                     </div>
                   </div>
                   
@@ -110,7 +112,7 @@ export const Features: React.FC = () => {
                 </div>
               </TiltCard>
             </Reveal>
-          ))}
+          )})}
         </div>
       </div>
     </section>

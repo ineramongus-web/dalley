@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Upload, Download, Filter, X, Loader2, FileText, Image as ImageIcon, Trash2, Edit2, Save, AlertTriangle, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { Search, Upload, Download, FileText, Image as ImageIcon, Trash2, Edit2, Save, AlertTriangle, Loader2, X } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { Reveal } from './Reveal';
 import { TEMPLATE_CATEGORIES, ADMIN_ID } from '../constants';
@@ -90,69 +90,43 @@ export const Templates: React.FC<TemplatesProps> = ({ onBackToHome }) => {
   };
 
   return (
-    <div className="min-h-screen bg-black relative pt-24">
-       {/* New Header Design */}
-       <div className="w-full bg-[#080808] border-b border-white/5 pb-12 mb-12 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(236,72,153,0.1),transparent_50%)]"></div>
-          
-          <div className="max-w-7xl mx-auto px-6 relative z-10 pt-8">
-              <button 
-                onClick={onBackToHome}
-                className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-8 group"
-              >
-                  <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                  Back to Home
-              </button>
-
-              <div className="flex flex-col lg:flex-row justify-between items-end gap-8">
-                  <div>
-                      <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-                          Community <span className="text-pink-500">Marketplace</span>
-                      </h1>
-                      <p className="text-zinc-400 max-w-xl text-lg">
-                          Discover premium UI kits, HUDs, and systems created by the Dalley community. Ready to import.
-                      </p>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
-                     {/* Floating Search Bar */}
-                     <div className="relative group min-w-[300px]">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-pink-500 transition-colors" />
-                        <input 
-                            type="text" 
-                            placeholder="Search templates..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-zinc-900 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all shadow-lg"
-                        />
-                     </div>
-                     <button
-                        onClick={() => {
-                            if (!user) {
-                                showToast("You must be signed in to upload", 'error');
-                                return;
-                            }
-                            setShowUploadModal(true);
-                        }}
-                        className="px-6 py-3 bg-white text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-pink-500 hover:text-white transition-all shadow-lg shadow-white/10 shrink-0"
-                    >
-                        <Upload className="w-5 h-5" />
-                        Upload
-                    </button>
-                  </div>
+    <div className="min-h-screen bg-black relative pt-32">
+       <div className="max-w-7xl mx-auto px-6 mb-12 relative z-10">
+          <div className="flex flex-col lg:flex-row justify-between items-end gap-8">
+              <div>
+                  <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
+                      Community <span className="text-pink-500">Marketplace</span>
+                  </h1>
+                  <p className="text-zinc-400 max-w-xl text-lg">
+                      Discover premium UI kits, HUDs, and systems created by the Dalley community.
+                  </p>
               </div>
 
-              {/* Categories Tabs */}
-              <div className="flex gap-2 mt-12 overflow-x-auto custom-scrollbar pb-2">
-                  {TEMPLATE_CATEGORIES.map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`px-5 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${selectedCategory === cat ? 'bg-pink-600 border-pink-500 text-white shadow-lg shadow-pink-900/20' : 'bg-zinc-900 border-white/5 text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
-                      >
-                          {cat}
-                      </button>
-                  ))}
+              <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
+                 {/* Floating Search Bar */}
+                 <div className="relative group min-w-[300px]">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-pink-500 transition-colors" />
+                    <input 
+                        type="text" 
+                        placeholder="Search templates..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-zinc-900 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all shadow-lg"
+                    />
+                 </div>
+                 <button
+                    onClick={() => {
+                        if (!user) {
+                            showToast("You must be signed in to upload", 'error');
+                            return;
+                        }
+                        setShowUploadModal(true);
+                    }}
+                    className="px-6 py-3 bg-white text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-pink-500 hover:text-white transition-all shadow-lg shadow-white/10 shrink-0"
+                >
+                    <Upload className="w-5 h-5" />
+                    Upload
+                </button>
               </div>
           </div>
        </div>
@@ -167,7 +141,7 @@ export const Templates: React.FC<TemplatesProps> = ({ onBackToHome }) => {
              <div className="text-center py-32 text-zinc-500 border border-dashed border-white/10 rounded-3xl bg-zinc-900/20">
                  <FileText className="w-16 h-16 mx-auto mb-6 opacity-30" />
                  <h3 className="text-xl font-bold text-white mb-2">No results found</h3>
-                 <p>Try adjusting your search or category filters.</p>
+                 <p>Try adjusting your search.</p>
              </div>
           ) : (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -216,7 +190,7 @@ export const Templates: React.FC<TemplatesProps> = ({ onBackToHome }) => {
           )}
        </div>
 
-       {/* Modals - Reused from previous implementation */}
+       {/* Modals */}
        <UploadModal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} onUploadSuccess={fetchTemplates} />
        {selectedTemplate && (
            <TemplateDetailModal 
@@ -239,7 +213,6 @@ export const Templates: React.FC<TemplatesProps> = ({ onBackToHome }) => {
 };
 
 const UploadModal: React.FC<{ isOpen: boolean, onClose: () => void, onUploadSuccess: () => void }> = ({ isOpen, onClose, onUploadSuccess }) => {
-    // ... [Previous UploadModal Logic] ...
     const { user } = useAuth();
     const { showToast } = useToast();
     const [title, setTitle] = useState('');
@@ -371,7 +344,6 @@ interface TemplateDetailProps {
 }
 
 const TemplateDetailModal: React.FC<TemplateDetailProps> = ({ template, onClose, onAuthorClick, onDelete, onUpdate, onDownloadIncrement }) => {
-    // ... [Previous DetailModal Logic] ...
     const { user } = useAuth();
     const { showToast } = useToast();
     const [isEditing, setIsEditing] = useState(false);
