@@ -29,6 +29,11 @@ function App() {
         setLoading(false);
     }, 2500);
 
+    // Check initial URL
+    const path = window.location.pathname;
+    if (path === '/editor') setCurrentView('editor');
+    else if (path === '/templates') setCurrentView('templates');
+
     // Event Listeners for Dock interactions
     const handleOpenAuth = () => setShowAuthModal(true);
     const handleOpenProfile = () => setShowProfileModal(true);
@@ -47,6 +52,10 @@ function App() {
     // Allow navigating to same view to trigger scroll to top
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Update URL without reload
+    const path = view === 'home' ? '/' : `/${view}`;
+    window.history.pushState({}, '', path);
   };
 
   // View Router
@@ -55,10 +64,10 @@ function App() {
           case 'home':
               return (
                   <PageWrapper key="home">
-                    <Hero />
+                    <Hero onNavigate={handleNavigate} />
                     <Features />
                     <Process />
-                    <CodePreview />
+                    <CodePreview onNavigate={handleNavigate} />
                     <Showcase />
                     <Testimonials />
                   </PageWrapper>
@@ -68,6 +77,18 @@ function App() {
                   <PageWrapper key="templates">
                     <Templates onBackToHome={() => handleNavigate('home')} />
                   </PageWrapper>
+              );
+          case 'editor':
+              return (
+                  <div className="fixed inset-0 z-[50] bg-[#050505] w-full h-full">
+                      <iframe 
+                          src="https://among-electricity-430.app.ohara.ai/"
+                          className="w-full h-full border-none"
+                          title="Dalley Editor"
+                          allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi; clipboard-read; clipboard-write"
+                          sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts allow-downloads"
+                      />
+                  </div>
               );
           case '404':
               return <PageWrapper key="404"><NotFound onGoHome={() => handleNavigate('home')} /></PageWrapper>;
@@ -92,7 +113,7 @@ function App() {
 
           {!loading && (
              <>
-                <Footer />
+                {currentView !== 'editor' && <Footer onNavigate={handleNavigate} />}
                 <Dock onNavigate={handleNavigate} />
                 <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
                 <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />

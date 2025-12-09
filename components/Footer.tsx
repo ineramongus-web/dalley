@@ -1,9 +1,12 @@
-
 import React from 'react';
 import { Twitter, Github, MessageSquare } from 'lucide-react';
 import { DalleyLogo } from './DalleyLogo';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onNavigate: (view: string) => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const openLink = () => window.open('https://example.com', '_blank');
 
   return (
@@ -11,7 +14,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-2">
-            <a href="#" className="flex items-center gap-2 mb-6 group">
+            <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('home'); }} className="flex items-center gap-2 mb-6 group">
               <DalleyLogo className="w-8 h-8 text-pink-500 group-hover:text-white transition-colors duration-300" variant="default" />
               <span className="font-sans font-bold text-xl tracking-tight text-white">
                 dalley.
@@ -32,7 +35,7 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-bold mb-6">Product</h4>
             <ul className="space-y-4 text-zinc-500">
-              <li><button onClick={openLink} className="hover:text-pink-400 transition-colors">Launch Beta</button></li>
+              <li><button onClick={() => onNavigate('editor')} className="hover:text-pink-400 transition-colors">Launch Beta</button></li>
               <li><button onClick={openLink} className="hover:text-pink-400 transition-colors">Changelog</button></li>
               <li><button onClick={openLink} className="hover:text-pink-400 transition-colors">Documentation</button></li>
             </ul>

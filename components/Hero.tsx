@@ -1,11 +1,14 @@
-
 import React, { useState } from 'react';
 import { Play, Code2, Layers, MousePointer2, ExternalLink, Move } from 'lucide-react';
 import { Reveal } from './Reveal';
 import { TextReveal } from './TextReveal';
 import { DotGrid } from './DotGrid';
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  onNavigate: (view: string) => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
   const [hovered, setHovered] = useState(false);
 
   return (
@@ -43,7 +46,7 @@ export const Hero: React.FC = () => {
           <Reveal delay={0.6} variant="slide-up">
             <div className="flex flex-wrap gap-4">
               <button
-                onClick={() => window.open('https://example.com', '_blank')}
+                onClick={() => onNavigate('editor')}
                 className="px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-pink-100 hover:scale-105 transition-all flex items-center gap-2 group shadow-[0_0_30px_-5px_rgba(255,255,255,0.4)] active:scale-95 duration-200"
               >
                 Try Beta <ExternalLink className="w-4 h-4 text-black transition-transform group-hover:translate-x-1" />

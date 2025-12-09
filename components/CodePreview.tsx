@@ -1,9 +1,12 @@
-
 import React, { useState } from 'react';
 import { Copy, Check, Terminal, ExternalLink, Zap } from 'lucide-react';
 import { Reveal } from './Reveal';
 
-export const CodePreview: React.FC = () => {
+interface CodePreviewProps {
+  onNavigate: (view: string) => void;
+}
+
+export const CodePreview: React.FC<CodePreviewProps> = ({ onNavigate }) => {
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'code'>('preview');
 
@@ -48,7 +51,7 @@ end)`;
   };
 
   const handleTryItOut = () => {
-    window.open('https://example.com', '_blank');
+    onNavigate('editor');
   };
   
   const highlightCode = (code: string) => {
