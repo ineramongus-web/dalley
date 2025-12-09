@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, MotionValue } from 'framer-motion';
 import { Home, LayoutTemplate, Code2, User } from 'lucide-react';
@@ -33,7 +32,11 @@ export const Dock: React.FC<DockProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div 
+    <motion.div 
+         initial={{ y: -100, opacity: 0 }}
+         animate={{ y: 0, opacity: 1 }}
+         exit={{ y: -100, opacity: 0 }}
+         transition={{ type: "spring", stiffness: 300, damping: 30 }}
          className="fixed top-6 right-6 z-[100] flex items-center bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl shadow-black/50 p-2 pl-6"
          onMouseMove={(e) => mouseX.set(e.clientX)}
          onMouseLeave={() => mouseX.set(Infinity)}
@@ -69,7 +72,7 @@ export const Dock: React.FC<DockProps> = ({ onNavigate }) => {
           </DockIcon>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

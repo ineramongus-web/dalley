@@ -29,10 +29,12 @@ function App() {
         setLoading(false);
     }, 2500);
 
-    // Check initial URL
+    // Check initial URL (Hash or Path)
+    const hash = window.location.hash;
     const path = window.location.pathname;
-    if (path === '/editor') setCurrentView('editor');
-    else if (path === '/templates') setCurrentView('templates');
+
+    if (hash === '#editor' || path === '/editor') setCurrentView('editor');
+    else if (hash === '#templates' || path === '/templates') setCurrentView('templates');
 
     // Event Listeners for Dock interactions
     const handleOpenAuth = () => setShowAuthModal(true);
@@ -53,9 +55,14 @@ function App() {
     setCurrentView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     
-    // Update URL without reload
-    const path = view === 'home' ? '/' : `/${view}`;
-    window.history.pushState({}, '', path);
+    // Update URL with hash to avoid SecurityErrors in restricted environments
+    const newUrl = view === 'home' ? '/' : `#${view}`;
+    try {
+      window.history.pushState({}, '', newUrl);
+    } catch (error) {
+      // Ignore security errors in sandboxed environments (e.g. blob URLs)
+      console.debug('History pushState suppressed:', error);
+    }
   };
 
   // View Router
@@ -114,7 +121,14 @@ function App() {
           {!loading && (
              <>
                 {currentView !== 'editor' && <Footer onNavigate={handleNavigate} />}
-                <Dock onNavigate={handleNavigate} />
+                
+                {/* Floating Dock - Hides when in editor */}
+                <AnimatePresence>
+                  {currentView !== 'editor' && (
+                    <Dock key="dock" onNavigate={handleNavigate} />
+                  )}
+                </AnimatePresence>
+
                 <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
                 <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} />
              </>
