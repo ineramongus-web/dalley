@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { DalleyLogo } from './DalleyLogo';
 
 export const LoadingScreen: React.FC = () => {
   const [progress, setProgress] = useState(0);
@@ -43,7 +43,7 @@ export const LoadingScreen: React.FC = () => {
             transition={{ duration: 1, ease: "easeOut" }}
             className="mb-8"
         >
-             <Layers className="w-16 h-16 text-white" />
+             <DalleyLogo className="w-24 h-24 text-white" variant="loading" />
         </motion.div>
 
         {/* Text */}

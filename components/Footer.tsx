@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { Layers, Twitter, Github, MessageSquare } from 'lucide-react';
+import { Twitter, Github, MessageSquare } from 'lucide-react';
+import { DalleyLogo } from './DalleyLogo';
 
 export const Footer: React.FC = () => {
   const openLink = () => window.open('https://example.com', '_blank');
@@ -11,7 +12,7 @@ export const Footer: React.FC = () => {
         <div className="grid md:grid-cols-4 gap-12 mb-16">
           <div className="col-span-1 md:col-span-2">
             <a href="#" className="flex items-center gap-2 mb-6 group">
-              <Layers className="w-8 h-8 text-pink-500 group-hover:rotate-12 transition-transform" />
+              <DalleyLogo className="w-8 h-8 text-pink-500 group-hover:text-white transition-colors duration-300" variant="default" />
               <span className="font-sans font-bold text-xl tracking-tight text-white">
                 dalley.
               </span>

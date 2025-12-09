@@ -1,7 +1,9 @@
-import React, { useRef } from 'react';
+
+import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, MotionValue } from 'framer-motion';
-import { Home, LayoutTemplate, Code2, User, Layers } from 'lucide-react';
+import { Home, LayoutTemplate, Code2, User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { DalleyLogo } from './DalleyLogo';
 
 interface DockProps {
   onNavigate: (view: string) => void;
@@ -10,6 +12,7 @@ interface DockProps {
 export const Dock: React.FC<DockProps> = ({ onNavigate }) => {
   const mouseX = useMotionValue(Infinity);
   const { user, profile } = useAuth();
+  const [isLogoHovered, setIsLogoHovered] = useState(false);
 
   const handleProfileClick = () => {
     if (!user) {
@@ -38,9 +41,14 @@ export const Dock: React.FC<DockProps> = ({ onNavigate }) => {
       {/* Logo Section */}
       <button 
         onClick={() => onNavigate('home')}
-        className="flex items-center gap-2 mr-4 group/logo cursor-pointer"
+        onMouseEnter={() => setIsLogoHovered(true)}
+        onMouseLeave={() => setIsLogoHovered(false)}
+        className="flex items-center gap-2 mr-4 group/logo cursor-pointer select-none"
       >
-        <Layers className="w-6 h-6 text-white group-hover/logo:text-pink-500 transition-colors duration-300" strokeWidth={2.5} />
+        <DalleyLogo 
+            className="w-8 h-8 text-white group-hover/logo:text-pink-500 transition-colors duration-300" 
+            variant={isLogoHovered ? 'hover' : 'default'}
+        />
         <span className="font-sans font-bold text-xl tracking-tight text-white group-hover/logo:text-pink-100 transition-colors">
           dalley.
         </span>

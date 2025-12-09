@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Layers } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { AuthModal } from './AuthModal';
 import { ProfileModal } from './ProfileModal';
+import { DalleyLogo } from './DalleyLogo';
 
 interface NavbarProps {
   currentView: string;
@@ -55,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate }) => {
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center pointer-events-auto">
           <a href="#" onClick={handleLogoClick} className="flex items-center gap-2 group relative z-[60]">
             <div className="relative transform transition-transform group-hover:rotate-12 duration-300">
-              <Layers className="w-8 h-8 text-white group-hover:text-pink-400 transition-colors duration-300" strokeWidth={2} />
+              <DalleyLogo className="w-10 h-10 text-white group-hover:text-pink-400 transition-colors duration-300" />
               <div className="absolute inset-0 bg-pink-500/40 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
             <span className="font-sans font-bold text-2xl tracking-tight text-white group-hover:text-pink-100 transition-all duration-300">
